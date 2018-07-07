@@ -14,6 +14,7 @@ class Grid {
 public:
     uint32_t score = 0;
     uint16_t myboard[SIZE][SIZE];
+    
 
 /*
 uint8_t scheme=0;
@@ -41,7 +42,7 @@ void getColor(uint16_t value, char *color, size_t length) {
 }
 
 // 绘制数据板,数据板共3×4行，7×4列
-void drawBoard(uint16_t board[SIZE][SIZE]) {
+void drawBoard(uint16_t board[SIZE][SIZE]=myboard) {
 	int8_t x,y;
 	// \033[m:关闭所有属性
 	char color[40], reset[] = "\033[m";
@@ -92,10 +93,10 @@ void drawBoard(uint16_t board[SIZE][SIZE]) {
 	printf("\033[A");
 }
  */
-    void drawBoard(uint16_t board[SIZE][SIZE]) {
+    void drawBoard() {
         for (int i = 0; i < SIZE; ++i) {
             for (int j = 0; j < SIZE; ++j) {
-                printf("\t%d\t", board[j][i]);
+                printf("\t%d\t", myboard[j][i]);
             }
             printf("\n");
         }
@@ -159,85 +160,85 @@ void drawBoard(uint16_t board[SIZE][SIZE]) {
     }
 
 //旋转数据板，向右旋转90度，这样可以用一个方向的数组移动间接控制四个方向的移动
-    void rotateBoard(uint16_t board[SIZE][SIZE]) {
+    void rotateBoard() {
         int8_t i, j, n = SIZE;
         uint16_t tmp;
         //环形旋转，先外而内，先左后右
         for (i = 0; i < n / 2; i++) {
             for (j = i; j < n - i - 1; j++) {
-                tmp = board[i][j];
-                board[i][j] = board[j][n - i - 1];
-                board[j][n - i - 1] = board[n - i - 1][n - j - 1];
-                board[n - i - 1][n - j - 1] = board[n - j - 1][i];
-                board[n - j - 1][i] = tmp;
+                tmp = myboard[i][j];
+                myboard[i][j] = myboard[j][n - i - 1];
+                myboard[j][n - i - 1] = myboard[n - i - 1][n - j - 1];
+                myboard[n - i - 1][n - j - 1] = myboard[n - j - 1][i];
+                myboard[n - j - 1][i] = tmp;
             }
         }
     }
 
 //向上移动数据板
-    bool moveUp(uint16_t board[SIZE][SIZE]) {
+    bool moveUp() {
         bool result = false;
         int8_t x;
         for (x = 0; x < SIZE; x++) {
             //对每一列做移动或者合并处理，
             //这里是列而不是行，与前面的输出顺序有关
-            result |= slideArray(board[x]);
+            result |= slideArray(myboard[x]);
             //只要有一列成功，就成功
         }
         return result;
     }
 
 // 左移：向右旋转90度，向上合并，再旋转3个90度
-    bool moveLeft(uint16_t board[SIZE][SIZE]) {
+    bool moveLeft() {
         bool result;
-        rotateBoard(board);
-        result = moveUp(board);
-        rotateBoard(board);
-        rotateBoard(board);
-        rotateBoard(board);
+        rotateBoard();
+        result = moveUp();
+        rotateBoard();
+        rotateBoard();
+        rotateBoard();
         return result;
     }
 
 // 下移：向右旋转2个90度，向上合并，再旋转2个90度
-    bool moveDown(uint16_t board[SIZE][SIZE]) {
+    bool moveDown() {
         bool result;
-        rotateBoard(board);
-        rotateBoard(board);
-        result = moveUp(board);
-        rotateBoard(board);
-        rotateBoard(board);
+        rotateBoard();
+        rotateBoard();
+        result = moveUp();
+        rotateBoard();
+        rotateBoard();
         return result;
     }
 
 // 右移：向右旋转3个90度，向上合并，再旋转1个90度
-    bool moveRight(uint16_t board[SIZE][SIZE]) {
+    bool moveRight() {
         bool result;
-        rotateBoard(board);
-        rotateBoard(board);
-        rotateBoard(board);
-        result = moveUp(board);
-        rotateBoard(board);
+        rotateBoard();
+        rotateBoard();
+        rotateBoard();
+        result = moveUp();
+        rotateBoard();
         return result;
     }
 
-    bool findPairDown(uint16_t board[SIZE][SIZE]) {
+    bool findPairDown() {
         bool result = false;
         int8_t x, y;
         for (x = 0; x < SIZE; x++) {
             for (y = 0; y < SIZE - 1; y++) {
-                if (board[x][y] == board[x][y + 1]) return true;
+                if (myboard[x][y] == myboard[x][y + 1]) return true;
             }
         }
         return result;
     }
 
 // 计算数据板是否已满
-    int16_t countEmpty(uint16_t board[SIZE][SIZE]) {
+    int16_t countEmpty() {
         int8_t x, y;
         int16_t count = 0;
         for (x = 0; x < SIZE; x++) {
             for (y = 0; y < SIZE; y++) {
-                if (board[x][y] == 0) {
+                if (myboard[x][y] == 0) {
                     count++;
                 }
             }
@@ -246,23 +247,23 @@ void drawBoard(uint16_t board[SIZE][SIZE]) {
     }
 
 // 检查游戏是否结束
-    bool gameEnded(uint16_t board[SIZE][SIZE]) {
+    bool gameEnded() {
         bool ended = true;
         // 如果有空位，未结束
-        if (countEmpty(board) > 0) return false;
+        if (countEmpty() > 0) return false;
         // 横向检查，有相等相邻数，未结束
-        if (findPairDown(board)) return false;
-        rotateBoard(board);
+        if (findPairDown()) return false;
+        rotateBoard();
         // 旋转一次，纵向检查，有相等相邻数，未结束
-        if (findPairDown(board)) ended = false;
-        rotateBoard(board);
-        rotateBoard(board);
-        rotateBoard(board);
+        if (findPairDown()) ended = false;
+        rotateBoard();
+        rotateBoard();
+        rotateBoard();
         return ended;
     }
 
 // 随机重置数据板
-    void addRandom(uint16_t board[SIZE][SIZE]) {
+    void addRandom() {
         // 全局变量，是否已初始化
         static bool initialized = false;
         // x,y 坐标
@@ -280,7 +281,7 @@ void drawBoard(uint16_t board[SIZE][SIZE]) {
         // 找出数据板上所有为空的坐标
         for (x = 0; x < SIZE; x++) {
             for (y = 0; y < SIZE; y++) {
-                if (board[x][y] == 0) {
+                if (myboard[x][y] == 0) {
                     list[len][0] = x;
                     list[len][1] = y;
                     len++;
@@ -294,7 +295,7 @@ void drawBoard(uint16_t board[SIZE][SIZE]) {
             x = list[r][0];
             y = list[r][1];
             n = ((rand() % 10) / 9 + 1) * 2;
-            board[x][y] = n;
+            myboard[x][y] = n;
         }
     }
 
@@ -396,7 +397,6 @@ void signal_callback_handler(int signum) {
 
 int main(int argc, char *argv[]) {
     Grid grid = Grid();
-    uint16_t board[SIZE][SIZE];
     char c;
     bool result;
 
@@ -419,12 +419,12 @@ int main(int argc, char *argv[]) {
 //	signal(SIGINT, signal_callback_handler);
 
     // 将数据清为0
-    memset(board, 0, sizeof(board));
+    memset(grid.myboard, 0, sizeof(grid.myboard));
     // 添加两次随机数,因为初始化时产生2个随机数
-    addRandom(board);
-    addRandom(board);
+    grid.addRandom();
+    grid.addRandom();
     // 绘制数据板
-    drawBoard(board);
+    grid.drawBoard();
     // 禁用缓存输入，终端支持按字符读取且不回显
 //	setBufferedInput(false);
     // 游戏主循环
@@ -434,22 +434,22 @@ int main(int argc, char *argv[]) {
             case 97:    // 'a' key
             case 104:    // 'h' key
             case 68:    // left arrow
-                result = moveLeft(board);
+                result = grid.moveLeft();
                 break;
             case 100:    // 'd' key
             case 108:    // 'l' key
             case 67:    // right arrow
-                result = moveRight(board);
+                result = grid.moveRight();
                 break;
             case 119:    // 'w' key
             case 107:    // 'k' key
             case 65:    // up arrow
-                result = moveUp(board);
+                result = grid.moveUp();
                 break;
             case 115:    // 's' key
             case 106:    // 'j' key
             case 66:    // down arrow
-                result = moveDown(board);
+                result = grid.moveDown();
                 break;
             default:
                 result = false;
@@ -458,9 +458,9 @@ int main(int argc, char *argv[]) {
         if (result) {
 //            drawBoard(board);
             usleep(150000);
-            addRandom(board);
-            drawBoard(board);
-            if (gameEnded(board)) {
+            grid.addRandom();
+            grid.drawBoard();
+            if (grid.gameEnded()) {
                 printf("         GAME OVER          \n");
                 break;
             }
@@ -475,7 +475,7 @@ int main(int argc, char *argv[]) {
 //					printf("\033[?25h");
                     exit(0);
                 } else {
-                    drawBoard(board);
+                    grid.drawBoard();
                     break;
                 }
             }
@@ -485,13 +485,13 @@ int main(int argc, char *argv[]) {
             while (true) {
                 c = getchar();
                 if (c == 'y') {
-                    memset(board, 0, sizeof(board));
-                    addRandom(board);
-                    addRandom(board);
-                    drawBoard(board);
+                    memset(grid.myboard, 0, sizeof(grid.myboard));
+                    grid.addRandom();
+                    grid.addRandom();
+                    grid.drawBoard();
                     break;
                 } else {
-                    drawBoard(board);
+                    grid.drawBoard();
                     break;
                 }
             }
