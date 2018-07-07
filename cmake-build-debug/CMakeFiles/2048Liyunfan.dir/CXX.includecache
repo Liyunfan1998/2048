@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/Users/luke1998/Desktop/2048Liyunfan/main.cpp
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+unistd.h
+-
+termios.h
+-
+stdbool.h
+-
+stdint.h
+-
+time.h
+-
+signal.h
+-
+
