@@ -11,7 +11,7 @@
 class Ai{
 public:
     static int count;
-    Ai(uint16_t board[SIZE][SIZE]);
+    Ai(Grid theGrid);
     ~Ai();
     std::pair<int,double> GetBest(int8_t depth,double alpha,double beta);
 private:
@@ -20,6 +20,6 @@ private:
     static const double monoWeight;
     static const double emptyWeight;
     static const double maxWeight;
-    uint16_t myboard[SIZE][SIZE];
+    Grid grid;
 };
 #endif //INC_2048LIYUNFAN_AI_H
